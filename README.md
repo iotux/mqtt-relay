@@ -24,9 +24,11 @@ or, if you want to use a different named config file:
 
   ## A configuration example
 
-  ```yaml
+```yaml
 ---
-# configuration
+#
+# mqtt-relay configuration
+#
 # Pay attention to the comments below and
 # make changes appropriate for your requirements
 # 
@@ -37,13 +39,13 @@ brokerInUser:
 brokerInPassword:
 # topicIn is mandatory. It can be with or without MQTT wildcards
 # It needs to be surrounded by quotes if the "#" wildcard is included
-topicIn: "tibber/#"
+topicIn: "whatever/#"
 
 # Params for the destfination broker
 # This example is for a remote broker secured with SSL/TLS and authentication
-brokerOutUrl: mqtt://broker.example.com:8883
-brokerOutUser: your-user-name
-brokerOutPassword: your-very-secret-password
+brokerOutUrl: mqtts://broker.example.com:8883
+brokerOutUser: your_username
+brokerOutPassword: your_very_secret_password
 # topicOutPrefix can be blank or whatever with or without a trailing "/". 
 # This will be prepended to outgoing topic
 topicOutPrefix: relay/
