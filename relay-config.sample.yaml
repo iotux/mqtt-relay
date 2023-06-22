@@ -14,9 +14,9 @@ topicIn: "whatever/#"
 
 # Params for the destfination broker
 # This example is for a remote broker secured with SSL/TLS and authentication
-brokerOutUrl: mqtt://localhost:1883
-brokerOutUser: 
-brokerOutPassword: 
+brokerOutUrl: mqtts://broker.example.com:8883
+brokerOutUser: your_username
+brokerOutPassword: your_very_secret_password
 # topicOutPrefix can be blank or whatever with or without a trailing "/". 
 # This will be prepended to outgoing topic
 topicOutPrefix: relay/
