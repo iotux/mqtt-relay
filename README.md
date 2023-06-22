@@ -5,7 +5,7 @@ This program is meant to be a helping hand if you don't want to bother your brok
 
 The configuration is simple. Just copy the **relay-config.sample.yaml** to **relay-config.yaml**, then fill in the blanks.
 It is possible to run several instances in parallel. Just make another copy of your configuration file and adjust the parameters.
-Then run the programwith the config file name as a single parameter like this:
+Then run the program with the config file name as a single parameter like this:
 
   **./mqtt-relay.js whatever-config.yaml**
 
