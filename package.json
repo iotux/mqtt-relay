@@ -1,0 +1,15 @@
+{
+  "name": "mqtt-relay",
+  "version": "0.0.1",
+  "description": "Development tools for the ElWiz project",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "iotux",
+  "license": "MIT",
+  "dependencies": {
+    "mqtt": "^4.3.7",
+    "yamljs": "^0.3.0"
+  }
+}
