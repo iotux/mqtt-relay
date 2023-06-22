@@ -10,7 +10,7 @@ brokerInUser:
 brokerInPassword:
 # topicIn is mandatory. It can be with or without MQTT wildcards
 # It needs to be surrounded by quotes if the "#" wildcard is included
-topicIn: "tibber/#"
+topicIn: "whatever/#"
 
 # Params for the destfination broker
 # This example is for a remote broker secured with SSL/TLS and authentication
