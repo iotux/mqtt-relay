@@ -9,7 +9,7 @@
   "author": "iotux",
   "license": "MIT",
   "dependencies": {
-    "mqtt": "^4.3.7",
-    "yamljs": "^0.3.0"
+    "js-yaml": "^4.1.0",
+    "mqtt": "^4.3.7"
   }
 }

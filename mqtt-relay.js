@@ -1,12 +1,15 @@
 #!/usr/bin/env node
 
 const args = process.argv;
-const yaml = require('yamljs');
+const fs = require('fs');
+const yaml = require('js-yaml');
 const mqtt = require("mqtt");
 
 const configFile = process.argv.length > 2 ? process.argv[2] : './relay-config.yaml';
 console.log('Using configuration from ' + configFile);
-const config = yaml.load(configFile);
+const config = loadYaml(configFile);
+
+let topicIn = [];
 
 // brokerIn options
 const brokerInUrl = config.brokerInUrl || 'mqtt://localhost:1883';
@@ -22,8 +25,19 @@ const brokerOutOptions = {
   password: config.brokerOutPassword || '',
 }
 
-const topicIn = config.topicIn || '';
+topicIn.push(config.topicIn) // || '';
+
 const topicOutPrefix = config.topicOutPrefix || '';
+
+function loadYaml(configPath) {
+  try {
+    const fileContents = fs.readFileSync(configPath, "utf8");
+    const data = yaml.load(fileContents);
+    return data;
+  } catch (error) {
+    console.error(`Error reading or parsing the YAML file: ${error}`);
+  }
+}
 
 let relay = {
   clientIn: undefined,
@@ -38,12 +52,14 @@ let relay = {
     console.log('Connecting...');
     relay.clientIn = mqtt.connect(brokerInUrl, brokerInOptions);
     relay.clientIn.on("connect", function () {
-      relay.clientIn.subscribe(topicIn, function (err) {
-        if (err) {
-          console.log("clientIn error", err);
-        } else {
-          console.log(`Listening on \"${brokerInUrl}\" with topic \"${topicIn}\"`)
-        }
+      topicIn.forEach((topic) => {
+        relay.clientIn.subscribe(topic, function (err) {
+          if (err) {
+            console.log("clientIn error", err);
+          } else {
+            console.log(`Listening on \"${brokerInUrl}\" with topic \"${topic}\"`)
+          }
+        });
       });
     });
 
@@ -66,6 +82,7 @@ let relay = {
 
   run: function () {
     relay.clientIn.on("message", function (topic, message) {
+      //console.log(topic, JSON.parse(message.toString()));
       if (topicOutPrefix !== '')
          topic = topicOutPrefix + topic;
       relay.clientOut.publish(topic, message);
@@ -75,3 +92,4 @@ let relay = {
 
 relay.init();
 relay.run();
+

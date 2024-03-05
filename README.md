@@ -34,16 +34,21 @@ or, if you want to use a different named config file:
 # 
 # Params for the source broker
 # This example is for an insecure broker running locally
-brokerInUrl: mqtt://localhost:1883
+# Please surround parameters with "#" or ":" with quotes,
+# as those characters are a part of the YAML syntax
+brokerInUrl: "mqtt://localhost:1883"
 brokerInUser:
 brokerInPassword:
 # topicIn is mandatory. It can be with or without MQTT wildcards
 # It needs to be surrounded by quotes if the "#" wildcard is included
-topicIn: "whatever/#"
+# An array of topics will be subscribed in sequence
+topicIn: 
+  - "whatever/#"
+  - "what/else/do/you/have/in/mind#"
 
 # Params for the destfination broker
 # This example is for a remote broker secured with SSL/TLS and authentication
-brokerOutUrl: mqtts://broker.example.com:8883
+brokerOutUrl: "mqtts://broker.example.com:8883"
 brokerOutUser: your_username
 brokerOutPassword: your_very_secret_password
 # topicOutPrefix can be blank or whatever with or without a trailing "/". 
