@@ -9,23 +9,18 @@ const configFile = process.argv.length > 2 ? process.argv[2] : './relay-config.y
 console.log('Using configuration from ' + configFile);
 const config = loadYaml(configFile);
 
-let topicIn = [];
+const debug = config.debug || false;
 
 // brokerIn options
 const brokerInUrl = config.brokerInUrl || 'mqtt://localhost:1883';
-const brokerInOptions = {
-  username: config.brokerInUser || '',
-  password: config.brokerInPassword || '',
-}
+const brokerInOptions = config.brokerInOptions;
 
 // brokerOut options
 const brokerOutUrl = config.brokerOutUrl || 'mqtt://localhost:1883';
-const brokerOutOptions = {
-  username: config.brokerOutUser || '',
-  password: config.brokerOutPassword || '',
-}
+const brokerOutOptions = config.brokerOutOptions;
 
-topicIn.push(config.topicIn) // || '';
+let topicIn = [];
+topicIn.push(config.topicIn); // || '';
 
 const topicOutPrefix = config.topicOutPrefix || '';
 
@@ -86,6 +81,8 @@ let relay = {
       if (topicOutPrefix !== '')
          topic = topicOutPrefix + topic;
       relay.clientOut.publish(topic, message);
+      if (debug)
+        console.log(topic, message.toString());
     });
   }
 };
