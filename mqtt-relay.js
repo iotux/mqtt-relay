@@ -81,8 +81,10 @@ let relay = {
       if (topicOutPrefix !== '')
          topic = topicOutPrefix + topic;
       relay.clientOut.publish(topic, message);
-      if (debug)
-        console.log(topic, message.toString());
+      if (debug) {
+        const msg = JSON.parse(message.toString());
+        console.log(topic, JSON.stringify(msg, null, 2));
+      }
     });
   }
 };
