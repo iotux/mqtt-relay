@@ -79,14 +79,16 @@ let relay = {
     relay.clientIn.on("message", function (topic, message) {
       //console.log(topic, JSON.parse(message.toString()));
       if (topicOutPrefix !== '')
-         topic = topicOutPrefix + topic;
+        topic = topicOutPrefix + topic;
       relay.clientOut.publish(topic, message);
       if (debug) {
         const msg = JSON.parse(message.toString());
-        console.log(topic, JSON.stringify(msg, null, 2));
+        console.log('topic:', topic);
+        console.log('message:', JSON.stringify(msg, null, 2));
       }
     });
   }
+
 };
 
 relay.init();
