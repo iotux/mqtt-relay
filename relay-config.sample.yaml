@@ -29,9 +29,14 @@ brokerOutOptions:
   username: your_username
   password: your_very_secret_password
 
+# Publishing options
+publishOptions:
+  retain: false
+  qos: 1
+
 # topicOutPrefix can be blank or whatever with or without a trailing "/". 
 # This will be prepended to outgoing topic
 topicOutPrefix: relay/
 
-debug: true
+debug: false
 

@@ -18,6 +18,7 @@ const brokerInOptions = config.brokerInOptions;
 // brokerOut options
 const brokerOutUrl = config.brokerOutUrl || 'mqtt://localhost:1883';
 const brokerOutOptions = config.brokerOutOptions;
+const publishOptions = config.publishOptions | { retain: false, qos: 1 }
 
 let topicIn = [];
 topicIn.push(config.topicIn); // || '';
@@ -80,10 +81,10 @@ let relay = {
       //console.log(topic, JSON.parse(message.toString()));
       if (topicOutPrefix !== '')
         topic = topicOutPrefix + topic;
-      relay.clientOut.publish(topic, message);
+      relay.clientOut.publish(topic, message, publishOptions);
       if (debug) {
         const msg = JSON.parse(message.toString());
-        console.log('topic:', topic);
+        console.log('topic:', topic, publishOptions);
         console.log('message:', JSON.stringify(msg, null, 2));
       }
     });
