@@ -6,27 +6,38 @@ class MqttRelay {
     this.debug = pairConfig.debug || false;
     this.brokerInUrl = pairConfig.brokerInUrl || 'mqtt://localhost:1883';
     this.brokerInOptions = pairConfig.brokerInOptions || {};
-    this.topicIn = new Set(pairConfig.topicIn || []);
+    this.topicMappings = pairConfig.topicMap || [];
     this.brokerOutUrl = pairConfig.brokerOutUrl || 'mqtt://localhost:1883';
     this.brokerOutOptions = pairConfig.brokerOutOptions || {};
     this.publishOptions = pairConfig.publishOptions || { retain: false, qos: 1 };
-    this.topicOutPrefix = pairConfig.topicOutPrefix || '';
-
-    // Use user-provided log function or default to console logging based on debug flag
-    this.log = options.log || ((message) => {
-      if (this.debug) {
-        console.log(message);
-      }
-    });
+    this.log = options.log || ((message) => { if (this.debug) console.log(message); });
 
     this.clientIn = null;
     this.clientOut = null;
     this.activeSubscriptions = new Set();
+
+    // Prepare topic mappings with regular expressions for matching
+    this.topicMap = this.topicMappings.map(mapping => {
+      const inPattern = this.buildRegexFromTopic(mapping.in);
+      return {
+        inPattern,
+        inTopic: mapping.in,
+        outPrefix: mapping.out || null // Null outPrefix means "pass through"
+      };
+    });
+  }
+
+  // Helper function to convert MQTT topic with wildcards to a regex pattern
+  buildRegexFromTopic(topic) {
+    const pattern = topic
+      .replace(/\+/g, '([^/]+)')   // + wildcard -> match one segment
+      .replace(/\/#$/, '(\/.*)?$'); // # wildcard at end -> match rest of topic
+    return new RegExp(`^${pattern}`);
   }
 
   init() {
-    if (this.topicIn.size === 0) {
-      this.log(`Check configuration for pair "${this.name}", missing input topics.`);
+    if (this.topicMap.length === 0) {
+      this.log(`No topic mappings defined for pair "${this.name}".`);
       return;
     }
 
@@ -35,51 +46,56 @@ class MqttRelay {
     this.clientOut = mqtt.connect(this.brokerOutUrl, this.brokerOutOptions);
 
     this.clientIn.on("connect", () => this.updateSubscriptions());
-    this.clientOut.on("connect", () => this.log(`Pair "${this.name}": Publishing to ${this.brokerOutUrl} with prefix "${this.topicOutPrefix}"`));
+    this.clientOut.on("connect", () => this.log(`Pair "${this.name}": Connected to ${this.brokerOutUrl}`));
 
     this.clientOut.on("error", (err) => console.error(`Pair "${this.name}" clientOut error: `, err));
   }
 
   updateSubscriptions() {
-    // Unsubscribe from topics no longer in topicIn and send null message to clear retain if needed
+    // Unsubscribe from topics no longer in topicMap
     for (const topic of this.activeSubscriptions) {
-      if (!this.topicIn.has(topic)) {
+      if (!this.topicMap.some(mapping => mapping.inTopic === topic)) {
         this.clientIn.unsubscribe(topic, (err) => {
-          if (err) {
-            console.error(`Error unsubscribing from topic "${topic}" for pair "${this.name}":`, err);
-          } else {
-            this.log(`Pair "${this.name}": Unsubscribed from topic "${topic}"`);
-            // Publish a null message to clear retained message if retain is false
-            if (!this.publishOptions.retain) {
-              this.clientOut.publish(`${this.topicOutPrefix}${topic}`, null, { retain: false });
-            }
-          }
+          if (!err) this.log(`Pair "${this.name}": Unsubscribed from topic "${topic}"`);
         });
         this.activeSubscriptions.delete(topic);
       }
     }
 
-    // Subscribe to new topics
-    for (const topic of this.topicIn) {
+    // Subscribe to topics in topicMap
+    for (const mapping of this.topicMap) {
+      const topic = mapping.inTopic;
       if (!this.activeSubscriptions.has(topic)) {
         this.clientIn.subscribe(topic, (err) => {
-          if (err) {
-            console.error(`clientIn subscribe error for pair "${this.name}":`, err);
-          } else {
-            this.log(`Pair "${this.name}": Subscribed to topic "${topic}"`);
-            this.activeSubscriptions.add(topic);
-          }
+          if (!err) this.log(`Pair "${this.name}": Subscribed to topic "${topic}"`);
+          this.activeSubscriptions.add(topic);
         });
       }
     }
   }
 
-
   run() {
     this.clientIn.on("message", (topic, message) => {
-      const outputTopic = this.topicOutPrefix ? `${this.topicOutPrefix}${topic}` : topic;
+      let outputTopic = topic; // Default to the original topic
+
+      for (const mapping of this.topicMap) {
+        const match = topic.match(mapping.inPattern);
+        if (match) {
+          if (mapping.outPrefix !== null) {
+            // If outPrefix is specified, transform the topic
+            outputTopic = `${mapping.outPrefix}${match[1] || ''}`;
+          }
+          break;
+        }
+      }
+
+      // Publish to the output topic
       this.clientOut.publish(outputTopic, message, this.publishOptions);
-      if (this.debug) this.log(`Pair "${this.name}" - Topic: ${outputTopic}`);
+
+      if (this.debug) {
+        this.log(`Pair "${this.name}" - Received topic: ${topic} - Published as: ${outputTopic}`);
+        this.log('Message:', message.toString());
+      }
     });
   }
 
@@ -96,4 +112,3 @@ class MqttRelay {
 }
 
 module.exports = MqttRelay;
-
