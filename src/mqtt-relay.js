@@ -41,24 +41,39 @@ class MqttRelay {
   }
 
   updateSubscriptions() {
+    // Unsubscribe from topics no longer in topicIn and send null message to clear retain if needed
     for (const topic of this.activeSubscriptions) {
       if (!this.topicIn.has(topic)) {
         this.clientIn.unsubscribe(topic, (err) => {
-          if (!err) this.log(`Pair "${this.name}": Unsubscribed from topic "${topic}"`);
+          if (err) {
+            console.error(`Error unsubscribing from topic "${topic}" for pair "${this.name}":`, err);
+          } else {
+            this.log(`Pair "${this.name}": Unsubscribed from topic "${topic}"`);
+            // Publish a null message to clear retained message if retain is false
+            if (!this.publishOptions.retain) {
+              this.clientOut.publish(`${this.topicOutPrefix}${topic}`, null, { retain: false });
+            }
+          }
         });
         this.activeSubscriptions.delete(topic);
       }
     }
 
+    // Subscribe to new topics
     for (const topic of this.topicIn) {
       if (!this.activeSubscriptions.has(topic)) {
         this.clientIn.subscribe(topic, (err) => {
-          if (!err) this.log(`Pair "${this.name}": Subscribed to topic "${topic}"`);
-          this.activeSubscriptions.add(topic);
+          if (err) {
+            console.error(`clientIn subscribe error for pair "${this.name}":`, err);
+          } else {
+            this.log(`Pair "${this.name}": Subscribed to topic "${topic}"`);
+            this.activeSubscriptions.add(topic);
+          }
         });
       }
     }
   }
+
 
   run() {
     this.clientIn.on("message", (topic, message) => {
