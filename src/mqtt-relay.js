@@ -18,11 +18,13 @@ class MqttRelay {
 
     // Prepare topic mappings with regular expressions for matching
     this.topicMap = this.topicMappings.map(mapping => {
+      const isExact = !mapping.in.endsWith('/#');
       const inPattern = this.buildRegexFromTopic(mapping.in);
       return {
         inPattern,
         inTopic: mapping.in,
-        outPrefix: mapping.out || null // Null outPrefix means "pass through"
+        outPrefix: mapping.out,
+        isExact
       };
     });
   }
@@ -81,8 +83,11 @@ class MqttRelay {
       for (const mapping of this.topicMap) {
         const match = topic.match(mapping.inPattern);
         if (match) {
-          if (mapping.outPrefix !== null) {
-            // If outPrefix is specified, transform the topic
+          if (mapping.isExact) {
+            // Exact match: use outPrefix directly
+            outputTopic = mapping.outPrefix;
+          } else {
+            // Prefix match: append remaining subtopics to outPrefix
             outputTopic = `${mapping.outPrefix}${match[1] || ''}`;
           }
           break;
