@@ -37,7 +37,7 @@ or for additional instances with other config files:
 pm2 --name "another-mqtt-instance" start mqtt-relay.js -- another-config.yaml
 ```
 
-##Using as a Module
+## Using as a Module
 You can use **MqttRelay** programmatically by importing it into your own Node.js scripts:
 ```jaascript
 const MqttRelay = require('mqtt-relay');
@@ -62,7 +62,7 @@ const relay = new MqttRelay(config, { log: customLogFunction });
 relay.init();
 relay.run();
 ```
-##A configuration example
+## A configuration example
 ```yaml
 ---
 # mqtt-relay configuration
@@ -92,7 +92,7 @@ topicOutPrefix: "relay/"
 # Set debug to true for logging relay activity
 debug: false
 ```
-##Features
+## Features
 - **Custom Logging:** You can provide your own log function for custom logging requirements.
 
 - **Multiple Instances:** Run multiple instances with different configuration files.
@@ -101,5 +101,5 @@ debug: false
 
 This module provides flexibility for a variety of MQTT relaying scenarios, whether used as a standalone script or integrated into your own application.
 
-##License
+## License
 This project is licensed under the MIT License.
