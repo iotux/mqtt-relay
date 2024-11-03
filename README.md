@@ -158,7 +158,3 @@ Examples:
 
 This project is licensed under the MIT License. See the [LICENSE](./LICENSE) file for details.
 ```
-
----
-
-This version has anonymized example data, while still illustrating the functionality and flexibility of `topicMap`. You can now copy this entire block for your `README.md`.
