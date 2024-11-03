@@ -1,9 +1,8 @@
-Certainly! Here’s an updated `README.md` with anonymized example data for the configuration. This will keep your personal test configuration private while still providing clear guidance for users.
 
-```markdown
+
 # mqtt-relay
 
-`mqtt-relay` is a flexible MQTT relay module that forwards messages from one broker to another. It allows you to selectively map and transform topics, enabling you to set custom output topics while preserving subtopic structures. This functionality is particularly useful in complex setups where specific MQTT topics need to be routed or modified between brokers.
+**mqtt-relay** is a flexible MQTT relay module that forwards messages from one broker to another. It allows you to selectively map and transform topics, enabling you to set custom output topics while preserving subtopic structures. This functionality is particularly useful in complex setups where specific MQTT topics need to be routed or modified between brokers.
 
 ## Installation
 
