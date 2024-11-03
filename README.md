@@ -1,105 +1,165 @@
-# mqtt-relay
-A flexible MQTT relay module for receiving messages from one broker, publishing them to another, and optionally changing topics during the relaying process.
+Certainly! Here’s an updated `README.md` with anonymized example data for the configuration. This will keep your personal test configuration private while still providing clear guidance for users.
 
-This package is designed to be a lightweight helper for managing MQTT message forwarding without overloading a broker, especially useful during development or for specific relay requirements.
+```markdown
+# mqtt-relay
+
+`mqtt-relay` is a flexible MQTT relay module that forwards messages from one broker to another. It allows you to selectively map and transform topics, enabling you to set custom output topics while preserving subtopic structures. This functionality is particularly useful in complex setups where specific MQTT topics need to be routed or modified between brokers.
 
 ## Installation
-Install the mqtt-relay package:
+
+Install the `mqtt-relay` package:
+
 ```bash
 npm install mqtt-relay
 ```
 
-## Configuration
+## Usage
 
-**1. Copy the sample configuration file:**
+### Basic Setup
 
-After installation, you can find a sample configuration file located at **node_modules/mqtt-relay/relay-config.sample.yaml**. Copy this to your project root as **relay-config.yaml:**
+After installation, set up a configuration file to specify the MQTT brokers, relay options, and topic mappings. You can find a sample configuration file in `node_modules/mqtt-relay/relay-config.sample.yaml`. Copy it to your project root and customize it:
+
 ```bash
 cp node_modules/mqtt-relay/relay-config.sample.yaml ./relay-config.yaml
 ```
-**2. Edit the configuration file:**
-Open **relay-config.yaml** and edit the configuration based on your broker settings and topics (see the configuration example below).
 
-**3. Run the relay:**
-You can run the program using the configuration file as a parameter:
+To run the relay with this configuration:
+
 ```bash
 node mqtt-relay.js relay-config.yaml
 ```
 
-## Using with PM2
-For programs intended to run unattended, PM2(https://www.npmjs.com/package/pm2) is a great process manager.
-You can set up each instance with a unique name by running:
+You can run multiple instances with different configurations. For each instance, specify the config file as a parameter:
+
 ```bash
-pm2 --name "remote-mqtt" start mqtt-relay.js -- relay-config.yaml
+node mqtt-relay.js another-config.yaml
 ```
-or for additional instances with other config files:
+
+### Using PM2
+
+To manage instances of `mqtt-relay` that need to run unattended, you can use [PM2](https://www.npmjs.com/package/pm2). Set each instance with a unique name:
+
 ```bash
-pm2 --name "another-mqtt-instance" start mqtt-relay.js -- another-config.yaml
+pm2 --name "mqtt-relay-instance" start mqtt-relay.js -- relay-config.yaml
 ```
 
-## Using as a Module
-You can use **MqttRelay** programmatically by importing it into your own Node.js scripts:
-```jaascript
-const MqttRelay = require('mqtt-relay');
+## Configuration
 
-// Example configuration
-const config = {
-  name: "RelayInstance",
-  brokerInUrl: "mqtt://localhost:1883",
-  brokerOutUrl: "mqtts://broker.example.com:8883",
-  topicIn: ["some/topic/#"],
-  topicOutPrefix: "relay/",
-  debug: true
-};
+### Config Structure
 
-// Optional custom log function
-const customLogFunction = (message) => {
-  console.log(`[Custom Log] ${message}`);
-};
+The configuration file allows you to define both input and output brokers, publishing options, and detailed topic mappings for flexible topic transformations.
 
-// Create and run the relay
-const relay = new MqttRelay(config, { log: customLogFunction });
-relay.init();
-relay.run();
-```
-## A configuration example
+### Example Configuration
+
 ```yaml
----
-# mqtt-relay configuration
-
-# Params for the source broker
-# Example of an insecure broker running locally
-brokerInUrl: "mqtt://localhost:1883"
+name: mqtt-relay-example
+brokerInUrl: "mqtt://input-broker.example.com:1883"
 brokerInOptions:
-  username: ""
-  password: ""
-# topicIn is mandatory; use MQTT wildcards if needed
-# For example, "#" includes all subtopics
-topicIn:
-  - "whatever/#"
-  - "what/else/do/you/have/in/mind#"
+  username: "inputUser"
+  password: "inputPassword"
 
-# Params for the destination broker
-# Example for a remote broker secured with SSL/TLS and authentication
-brokerOutUrl: "mqtts://broker.example.com:8883"
+brokerOutUrl: "mqtt://output-broker.example.com:1883"
 brokerOutOptions:
-  username: "your_username"
-  password: "your_very_secret_password"
+  username: "outputUser"
+  password: "outputPassword"
 
-# Optional topic prefix for outgoing messages
-topicOutPrefix: "relay/"
+publishOptions:
+  retain: true
+  qos: 1
 
-# Set debug to true for logging relay activity
 debug: false
+
+topicMap:
+  - in: "device123/sensor/#"
+    out: "home/sensors"
+  - in: "monitoring/temperature"
+    out: "metrics/temperature"
+  - in: "alerts/#"
+    out: "notifications/alerts"
+  - in: "system/status"
+    out: "status/system"
 ```
-## Features
-- **Custom Logging:** You can provide your own log function for custom logging requirements.
 
-- **Multiple Instances:** Run multiple instances with different configuration files.
+### `topicMap` Configuration
 
-- **PM2 Integration:** Easily manage instances with PM2 for unattended operation.
+`topicMap` specifies how each input topic (`in`) is transformed before it is published to the output broker. This allows you to relay topics directly or modify them based on custom mappings.
 
-This module provides flexibility for a variety of MQTT relaying scenarios, whether used as a standalone script or integrated into your own application.
+#### Types of Mappings
+
+1. **Prefix Match with Dynamic Subtopics**:
+   - If the `in` topic ends with `/#`, it will match the topic prefix and relay any additional subtopic structure.
+   - Example:
+     ```yaml
+     - in: "device123/sensor/#"
+       out: "home/sensors"
+     ```
+     - Incoming topic: `device123/sensor/temperature/reading`
+     - Published topic: `home/sensors/temperature/reading`
+
+2. **Exact Match**:
+   - If the `in` topic does not end with `/#`, it will only match the specific topic exactly as written.
+   - Example:
+     ```yaml
+     - in: "monitoring/temperature"
+       out: "metrics/temperature"
+     ```
+     - Incoming topic: `monitoring/temperature`
+     - Published topic: `metrics/temperature`
+
+3. **Pass-Through (No `out` Specified)**:
+   - If no `out` field is provided, the input topic will be passed through unmodified.
+   - Example:
+     ```yaml
+     - in: "alerts/#"
+     ```
+     - Incoming topic: `alerts/high`
+     - Published topic: `alerts/high`
+
+### Constructing `topicMap`
+
+To construct the `topicMap`:
+
+- **`in`**: Specify the incoming topic to match. Use `+` to match one level and `/#` at the end to match all remaining subtopics.
+- **`out`** (optional): Specify the output topic prefix. If `/#` is used in `in`, the remaining subtopics will be appended to `out`.
+
+Examples:
+
+1. **Dynamic Mapping with Prefix**:
+   ```yaml
+   - in: "device123/sensor/#"
+     out: "home/sensors"
+   ```
+   - Matches all topics under `device123/sensor` and publishes them under `home/sensors` with the original subtopics appended.
+
+2. **Exact Mapping**:
+   ```yaml
+   - in: "monitoring/temperature"
+     out: "metrics/temperature"
+   ```
+   - Only `monitoring/temperature` is matched and relayed as `metrics/temperature` with no appended subtopics.
+
+3. **Pass-Through**:
+   ```yaml
+   - in: "alerts/#"
+   ```
+   - Passes through all topics under `alerts` without modification.
+
+### Additional Options
+
+- **`brokerInUrl`**: URL of the input broker.
+- **`brokerInOptions`**: Credentials for the input broker.
+- **`brokerOutUrl`**: URL of the output broker.
+- **`brokerOutOptions`**: Credentials for the output broker.
+- **`publishOptions`**:
+  - `retain`: Whether to retain messages on the output broker.
+  - `qos`: QoS level for the output broker (0, 1, or 2).
+- **`debug`**: Set to `true` to enable detailed logging.
 
 ## License
-This project is licensed under the MIT License.
+
+This project is licensed under the MIT License. See the [LICENSE](./LICENSE) file for details.
+```
+
+---
+
+This version has anonymized example data, while still illustrating the functionality and flexibility of `topicMap`. You can now copy this entire block for your `README.md`.
