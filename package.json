@@ -1,23 +1,29 @@
 {
   "name": "mqtt-relay",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A flexible MQTT relay module for forwarding messages between brokers.",
   "main": "index.js",
   "scripts": {
     "test": "mocha"
   },
-    "repository": {
+  "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/mqtt-relay.git"
+    "url": "https://github.com/iotux/mqtt-relay.git"
   },
-  "keywords": ["mqtt", "relay", "broker", "publish", "subscribe"],
+  "keywords": [
+    "mqtt",
+    "relay",
+    "broker",
+    "publish",
+    "subscribe"
+  ],
   "author": "iotux",
   "license": "MIT",
   "dependencies": {
     "js-yaml": "^4.1.0",
     "mqtt": "^4.3.7"
   },
-    "devDependencies": {
+  "devDependencies": {
     "mocha": "^9.0.0"
   }
 }
