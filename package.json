@@ -1,15 +1,23 @@
 {
   "name": "mqtt-relay",
   "version": "0.0.1",
-  "description": "Development tools for the ElWiz project",
+  "description": "A flexible MQTT relay module for forwarding messages between brokers.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha"
   },
+    "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/mqtt-relay.git"
+  },
+  "keywords": ["mqtt", "relay", "broker", "publish", "subscribe"],
   "author": "iotux",
   "license": "MIT",
   "dependencies": {
     "js-yaml": "^4.1.0",
     "mqtt": "^4.3.7"
+  },
+    "devDependencies": {
+    "mocha": "^9.0.0"
   }
 }

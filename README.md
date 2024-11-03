@@ -1,57 +1,105 @@
 # mqtt-relay
-A simple MQTT relay, receiving messages from one broker, publishing to another and optionally changing topics during the relaying process.
+A flexible MQTT relay module for receiving messages from one broker, publishing them to another, and optionally changing topics during the relaying process.
 
-This program is meant to be a helping hand if you don't want to bother your broker during development work or otherwise.
+This package is designed to be a lightweight helper for managing MQTT message forwarding without overloading a broker, especially useful during development or for specific relay requirements.
 
-The configuration is simple. Just copy the **relay-config.sample.yaml** to **relay-config.yaml**, then fill in the blanks.
-It is possible to run several instances in parallel. Just make another copy of your configuration file and adjust the parameters.
-Then run the program with the config file name as a single parameter like this:
+## Installation
+Install the mqtt-relay package:
+```bash
+npm install mqtt-relay
+```
 
-  **./mqtt-relay.js whatever-config.yaml**
+## Configuration
 
-If running several instances is one of your work habits, then some kind of managing system should be in place.
+**1. Copy the sample configuration file:**
 
-**PM2 (https://www.npmjs.com/package/pm2)** is your friend for programs supposed to run unattended.
+After installation, you can find a sample configuration file located at **node_modules/mqtt-relay/relay-config.sample.yaml**. Copy this to your project root as **relay-config.yaml:**
+```bash
+cp node_modules/mqtt-relay/relay-config.sample.yaml ./relay-config.yaml
+```
+**2. Edit the configuration file:**
+Open **relay-config.yaml** and edit the configuration based on your broker settings and topics (see the configuration example below).
 
-When using **PM2**, you can give each instance a unique name.
-Just run the program like this:
+**3. Run the relay:**
+You can run the program using the configuration file as a parameter:
+```bash
+node mqtt-relay.js relay-config.yaml
+```
 
-  **pm2 --name remote-mqtt start mqtt-relay.js**
+## Using with PM2
+For programs intended to run unattended, PM2(https://www.npmjs.com/package/pm2) is a great process manager.
+You can set up each instance with a unique name by running:
+```bash
+pm2 --name "remote-mqtt" start mqtt-relay.js -- relay-config.yaml
+```
+or for additional instances with other config files:
+```bash
+pm2 --name "another-mqtt-instance" start mqtt-relay.js -- another-config.yaml
+```
 
-or, if you want to use a different named config file:
+##Using as a Module
+You can use **MqttRelay** programmatically by importing it into your own Node.js scripts:
+```jaascript
+const MqttRelay = require('mqtt-relay');
 
-  **pm2 --name remote-mqtt start mqtt-relay.js -- whatever-config.yaml**
+// Example configuration
+const config = {
+  name: "RelayInstance",
+  brokerInUrl: "mqtt://localhost:1883",
+  brokerOutUrl: "mqtts://broker.example.com:8883",
+  topicIn: ["some/topic/#"],
+  topicOutPrefix: "relay/",
+  debug: true
+};
 
-  ## A configuration example
+// Optional custom log function
+const customLogFunction = (message) => {
+  console.log(`[Custom Log] ${message}`);
+};
 
+// Create and run the relay
+const relay = new MqttRelay(config, { log: customLogFunction });
+relay.init();
+relay.run();
+```
+##A configuration example
 ```yaml
 ---
-#
 # mqtt-relay configuration
-#
-# Pay attention to the comments below and
-# make changes appropriate for your requirements
-# 
+
 # Params for the source broker
-# This example is for an insecure broker running locally
-# Please surround parameters with "#" or ":" with quotes,
-# as those characters are a part of the YAML syntax
+# Example of an insecure broker running locally
 brokerInUrl: "mqtt://localhost:1883"
-brokerInUser:
-brokerInPassword:
-# topicIn is mandatory. It can be with or without MQTT wildcards
-# It needs to be surrounded by quotes if the "#" wildcard is included
-# An array of topics will be subscribed in sequence
-topicIn: 
+brokerInOptions:
+  username: ""
+  password: ""
+# topicIn is mandatory; use MQTT wildcards if needed
+# For example, "#" includes all subtopics
+topicIn:
   - "whatever/#"
   - "what/else/do/you/have/in/mind#"
 
-# Params for the destfination broker
-# This example is for a remote broker secured with SSL/TLS and authentication
+# Params for the destination broker
+# Example for a remote broker secured with SSL/TLS and authentication
 brokerOutUrl: "mqtts://broker.example.com:8883"
-brokerOutUser: your_username
-brokerOutPassword: your_very_secret_password
-# topicOutPrefix can be blank or whatever with or without a trailing "/". 
-# This will be prepended to outgoing topic
-topicOutPrefix: relay/
+brokerOutOptions:
+  username: "your_username"
+  password: "your_very_secret_password"
+
+# Optional topic prefix for outgoing messages
+topicOutPrefix: "relay/"
+
+# Set debug to true for logging relay activity
+debug: false
 ```
+##Features
+- **Custom Logging:** You can provide your own log function for custom logging requirements.
+
+- **Multiple Instances:** Run multiple instances with different configuration files.
+
+- **PM2 Integration:** Easily manage instances with PM2 for unattended operation.
+
+This module provides flexibility for a variety of MQTT relaying scenarios, whether used as a standalone script or integrated into your own application.
+
+##License
+This project is licensed under the MIT License.
