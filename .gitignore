@@ -1,4 +1,2 @@
 #
 node_modules/*
-!relay-config.sample.yaml
-*.yaml

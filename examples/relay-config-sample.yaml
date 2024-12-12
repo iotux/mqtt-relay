@@ -1,0 +1,68 @@
+---
+- name: myLocalBroker 
+  #
+  # mqtt-relay configuration
+  #
+  # Pay attention to the comments below and
+  # make changes appropriate for your own requirements
+  # 
+  # Params for the source broker
+  # This example is for an insecure broker running locally
+  # Please surround parameters with "#" or ":" with quotes,
+  # as those characters are a part of the YAML syntax
+  # For remote broker with SSL:
+  #brokerInUrl: "mqtts://remote.broker:8883"
+  brokerInUrl: "mqtt://localhost:1883"
+  brokerInOptions:
+    username:
+    password:
+
+  ####################################
+  # Params for the destfination broker
+  # This example is for a remote broker secured with SSL/TLS and authentication
+  brokerOutUrl: "mqtts://remote.broker:8883"
+  brokerOutOptions:
+    username: my_user_name
+    password: my_very_secret_password
+
+  # Publishing options
+  publishOptions:
+    retain: false
+    qos: 1
+
+  # Modify according to your requirements
+  # Add additional pairs if needed
+  topicMap:
+    - in: "1111-2222-3333-4444/HP/#"
+      out: "heatpump"
+    - in: "elwiz/chart/spotBelowThreshold"
+      out: "chart/spotBelowThreshold"
+    - in: "elwiz/chart/thresholdStates"
+      out: "chart/thresholdStates"
+
+  debug: false
+
+# For an additional relay, uncomment the following
+# For the need of more than 2 relays,
+# copy the following configuration
+#- name: remoteBroker 
+#  brokerInUrl: "mqtts://remote.broker:8883"
+#  brokerInOptions:
+#    username: my_user_name
+#    password: my_very_secret_password
+#
+#  brokerOutUrl: "mqtt://localhost:1883"
+#  brokerOutOptions:
+#    username:
+#    password:
+#
+#  publishOptions:
+#    retain: false
+#    qos: 1
+#
+#  topicMap: 
+#    - in: "1111-2222-3333-4444/HP/#"
+#      out: hp
+#
+#  debug: false
+
