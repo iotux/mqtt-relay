@@ -33,12 +33,14 @@
   # Modify according to your requirements
   # Add additional pairs if needed
   topicMap:
-    - in: "1111-2222-3333-4444/HP/#"
-      out: "heatpump"
-    - in: "elwiz/chart/spotBelowThreshold"
-      out: "chart/spotBelowThreshold"
-    - in: "elwiz/chart/thresholdStates"
-      out: "chart/thresholdStates"
+    - in: "device123/sensor/#"
+      out: "home/sensors"
+    - in: "monitoring/temperature"
+      out: "metrics/temperature"
+    - in: "alerts/#"
+      out: "notifications/alerts"
+    - in: "system/status"
+      out: "status/system"
 
   debug: false
 
@@ -61,8 +63,8 @@
 #    qos: 1
 #
 #  topicMap: 
-#    - in: "1111-2222-3333-4444/HP/#"
-#      out: hp
+#    - in: "system/status"
+#      out: "status/system"
 #
 #  debug: false
 

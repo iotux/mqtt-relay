@@ -16,16 +16,11 @@ npm install mqtt-relay
 
 ### Basic Setup
 
-After installation, set up a configuration file to specify the MQTT brokers, relay options, and topic mappings. You can find a sample configuration file in `node_modules/mqtt-relay/relay-config.sample.yaml`. Copy it to your project root and customize it:
+After installation, set up a configuration file to specify the MQTT brokers, relay options, and topic mappings. You can find a sample configuration file in `node_modules/mqtt-relay/relay-config-sample.yaml`.
+Copy it to your project root and customize it by running:
 
 ```bash
-cp node_modules/mqtt-relay/relay-config.sample.yaml ./relay-config.yaml
-```
-
-To run the relay with this configuration:
-
-```bash
-node mqtt-relay.js relay-config.yaml
+npm start
 ```
 
 You can run multiple instances with different configurations. For each instance, specify the config file as a parameter:
@@ -33,6 +28,9 @@ You can run multiple instances with different configurations. For each instance,
 ```bash
 node mqtt-relay.js another-config.yaml
 ```
+
+With the provided program, you can also configure several setups in a single cofiguration as shown in the sample configuration file, giving each instance a name.
+The name is shown in the logs.
 
 ### Using PM2
 
@@ -153,6 +151,28 @@ Examples:
   - `retain`: Whether to retain messages on the output broker.
   - `qos`: QoS level for the output broker (0, 1, or 2).
 - **`debug`**: Set to `true` to enable detailed logging.
+
+## You can also write your own program by importing the mqtt-relay module:
+```javascript
+const MqttRelay = require('mqtt-relay');
+
+// Example configuration
+const config = {
+  name: "relay1",
+  brokerInUrl: "mqtt://input-broker.example.com:1883",
+  brokerOutUrl: "mqtt://output-broker.example.com:1883",
+  topicMap: [
+    { in: "device/sensor/#", out: "home/sensors" },
+    { in: "alerts/#", out: "notifications/alerts" },
+  ],
+  publishOptions: { retain: true, qos: 1 },
+  debug: true,
+};
+
+const relay = new MqttRelay(config);
+relay.init();
+relay.run();
+```
 
 ## License
 
