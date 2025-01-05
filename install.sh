@@ -13,8 +13,8 @@ fi
 
 # Copy example files
 echo "Installing mqtt-relay example program and configuration..."
-cp ./examples/relay.js "$TARGET_PROGRAM"
-cp ./examples/relay-config-sample.yaml "$TARGET_CONFIG"
+cp node_modules/mqtt-relay/examples/relay.js "$TARGET_PROGRAM"
+cp node_modules/mqtt-relay/examples/relay-config-sample.yaml "$TARGET_CONFIG"
 
 # Display success message
 echo "Installation complete!"
