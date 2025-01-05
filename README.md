@@ -6,22 +6,35 @@
 
 ## Installation
 
+Make a directory where you want your mqtt-relay reside, then cd to that directory.
+
+```bash
+mkdir mqtt-relay
+cd mqtt-relay
+```
+
 Install the `mqtt-relay` package:
 
 ```bash
 npm install mqtt-relay
 ```
 
+Start the install script
+
+```bash
+bash node_modules/mqtt-relay/install.sh
+```
+The `install.sh` script will copy a fully functional example program `relay.js` and an example configuration file `relay-config-sample.yaml` to your chosen directory.
+
+```bash
+cp relay-config-sample.yaml relay-config.yaml
+```
+
 ## Usage
 
 ### Basic Setup
 
-After installation, set up a configuration file to specify the MQTT brokers, relay options, and topic mappings. You can find a sample configuration file in `node_modules/mqtt-relay/relay-config-sample.yaml`.
-Copy it to your project root and customize it by running:
-
-```bash
-npm start
-```
+After installation, edit your newly created configuration file to specify the MQTT brokers, relay options, and topic mappings.
 
 You can run multiple instances with different configurations. For each instance, specify the config file as a parameter:
 
