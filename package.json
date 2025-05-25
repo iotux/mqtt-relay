@@ -1,6 +1,6 @@
 {
   "name": "mqtt-relay",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A flexible MQTT relay module for forwarding messages between brokers.",
   "main": "index.js",
   "scripts": {
@@ -28,6 +28,6 @@
     "mqtt-relay": "^0.1.0"
   },
   "devDependencies": {
-    "mocha": "^9.0.0"
+    "mocha": "^11.5.0"
   }
 }
