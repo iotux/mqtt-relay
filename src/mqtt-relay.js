@@ -87,6 +87,9 @@ function setValueByPath(obj, pathString, newValue) {
 
 class MqttRelay {
   constructor(pairConfig, options = {}) {
+    if (!pairConfig) {
+      throw new Error('pairConfig is required');
+    }
     this.name = pairConfig.name || 'UnnamedRelay';
     this.isRunning = false;
     this.originalPairConfig = JSON.parse(JSON.stringify(pairConfig));
@@ -227,7 +230,7 @@ class MqttRelay {
     this.log(`Instance "${this.name}" internal state re-initialized. Control sub: ${this.instanceApiSubscription}`, 'info');
   }
 
-  init() {
+  async start() {
     return new Promise(async (resolve, reject) => {
       this.log(`Connecting MQTT clients for "${this.name}"...`, 'info');
       this.isRunning = false;
@@ -260,6 +263,7 @@ class MqttRelay {
           // If clientOut is not essential for basic operation
           this.isRunning = true;
           this.publishStatus('Relay connected/initialized.');
+          this.log(`Relay "${this.name}" is active and processing messages.`, 'info');
           resolve();
         } else if (connectionError) {
           this.isRunning = false;
@@ -628,18 +632,7 @@ class MqttRelay {
     if (!published) this.log(`Message from topic "${incomingTopic}" did not match patterns. Discarded.`, 'debug');
   }
 
-  run() {
-    if (!this.isRunning && this.clientIn && this.clientIn.connected && this.clientOut && this.clientOut.connected) {
-      this.isRunning = true;
-    }
-    if (this.isRunning) {
-      this.log(`Relay "${this.name}" is active and processing messages.`, 'info');
-    } else if (this.topicMap.length === 0) {
-      this.log(`Relay "${this.name}" not running (no valid topic mappings).`, 'warn');
-    } else {
-      this.log(`Relay "${this.name}" is not currently running (clients might be disconnected or instance stopped).`, 'warn');
-    }
-  }
+  
 
   async stop() {
     this.log(`Stopping relay "${this.name}"...`, 'info');

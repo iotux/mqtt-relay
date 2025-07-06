@@ -1,56 +1,49 @@
-
-
 # mqtt-relay
 
 **mqtt-relay** is a flexible MQTT relay module that forwards messages from one broker to another. It allows you to selectively map and transform topics, enabling you to set custom output topics while preserving subtopic structures. This functionality is particularly useful in complex setups where specific MQTT topics need to be routed or modified between brokers.
 
 ## Installation
 
-Make a directory where you want your mqtt-relay reside, then cd to that directory.
+To install `mqtt-relay` globally, use npm:
 
 ```bash
-mkdir mqtt-relay
-cd mqtt-relay
+npm install -g mqtt-relay
 ```
 
-Install the `mqtt-relay` package:
-
-```bash
-npm install mqtt-relay
-```
-
-Start the install script
-
-```bash
-bash node_modules/mqtt-relay/install.sh
-```
-The `install.sh` script will copy a fully functional example program `relay.js` and an example configuration file `relay-config-sample.yaml` to your chosen directory.
-
-```bash
-cp relay-config-sample.yaml relay-config.yaml
-```
+*Note: You might see warnings about deprecated dependencies during installation. These are typically related to development dependencies and do not affect the functionality of `mqtt-relay`.*
 
 ## Usage
 
 ### Basic Setup
 
-After installation, edit your newly created configuration file to specify the MQTT brokers, relay options, and topic mappings.
+After installation, you can initialize a sample configuration file in your current directory:
+
+```bash
+mqtt-relay init
+```
+
+This will create a `relay-config.yaml` file. Edit this file to specify your MQTT brokers, relay options, and topic mappings.
+
+Then, run `mqtt-relay` with your configuration file:
+
+```bash
+mqtt-relay relay-config.yaml
+```
 
 You can run multiple instances with different configurations. For each instance, specify the config file as a parameter:
 
 ```bash
-node mqtt-relay.js another-config.yaml
+mqtt-relay another-config.yaml
 ```
 
-With the provided program, you can also configure several setups in a single cofiguration as shown in the sample configuration file, giving each instance a name.
-The name is shown in the logs.
+With the provided program, you can also configure several setups in a single configuration as shown in the sample configuration file, giving each instance a name. The name is shown in the logs.
 
 ### Using PM2
 
 To manage instances of `mqtt-relay` that need to run unattended, you can use [PM2](https://www.npmjs.com/package/pm2). Set each instance with a unique name:
 
 ```bash
-pm2 --name "mqtt-relay-instance" start mqtt-relay.js -- relay-config.yaml
+pm2 --name "mqtt-relay-instance" mqtt-relay -- relay-config.yaml
 ```
 
 ## Configuration
@@ -183,11 +176,9 @@ const config = {
 };
 
 const relay = new MqttRelay(config);
-relay.init();
-relay.run();
+relay.start();
 ```
 
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](./LICENSE) file for details.
-```
